@@ -159,12 +159,82 @@ function playSoftClick() {
 
 // Master App Initialization
 function initApp() {
+  restructureMoodboards();
   setupFilterTabs();
   setupFloorplanHotspots();
   setupMaterialInspector();
   setupLightbox();
   setupPresentationMode();
   setupPrintExport();
+}
+
+const ZONE_STORY_MAP = {
+  lobby: 'Sảnh chính mở ra bằng không gian đón ánh sáng và nhịp gỗ sồi ấm áp, giúp mọi khách đến đều cảm nhận ngay sự chuyên nghiệp và tinh thần tiên phong của thương hiệu. Cửa xoay pivot cùng trần vòm dẫn ánh dài tạo trải nghiệm bước vào như một lời chào chính thức và có tính nhấn mạnh thương hiệu.',
+  reception: 'Lễ tân được xây dựng như một tác phẩm nghệ thuật công sở, nơi đá đen điêu khắc và vách gạch kính làm nền cho phong cách đón tiếp hiện đại, tinh tế và mạnh mẽ. Không gian này vừa mang tính khách quan vừa tạo cảm giác thân thiện, giúp đối tác cảm thấy được chào đón ngay từ phút đầu.',
+  boardroom: 'Phòng họp lớn 20 pax là nơi những quyết định chiến lược được hình thành, nên việc ưu tiên ánh sáng, âm thanh và chất liệu sang trọng là cực kỳ quan trọng. Màu xanh denim và gỗ óc chó tạo cảm giác tin cậy, trong khi sự xa hoa của vách kính và đèn trần bền vững nâng tầm đẳng cấp doanh nghiệp.',
+  central: 'Khối làm việc trung tâm là nhịp đập năng lượng của văn phòng, nơi sự chuyên nghiệp được kết hợp với tinh thần sáng tạo và tính cộng tác cao. Sàn phân vùng màu vàng - xám - xanh cùng hệ cây xanh giúp không gian vừa khoa học, vừa sống động, khuyến khích đội ngũ tạo ra những ý tưởng mới mỗi ngày.',
+  creative: 'Creative Space không chỉ là nơi làm việc mà là nơi khơi gợi sự bùng nổ của ý tưởng, brainstorming và thử nghiệm. Vách viết trắng, vật liệu mềm và đèn trung tính giúp không gian giữ được sự thăng hoa nhưng vẫn kiểm soát được sự tập trung và hiệu quả làm việc.',
+  management: 'Các phòng quản lý mang tiêu chuẩn riêng tư, quyền lực và sự yên tĩnh để ra quyết định. Gỗ tự nhiên, kính trong và ánh sáng ấm tạo môi trường chuyên nghiệp nhưng vẫn gần gũi, phù hợp với phong cách lãnh đạo hiện đại, hiệu quả và không bạo lực.',
+  smallmeeting: 'Phòng họp nhỏ 4 người được thiết kế cho các cuộc trao đổi nhanh, call online và thảo luận nội bộ với mức độ tập trung cao. Sự lựa chọn vật liệu tiêu âm và mặt kính có độ trong vừa đủ tạo cảm giác kín đáo, nghiêm túc nhưng không làm mất sự mở và linh hoạt.',
+  pantry: 'Pantry và quầy bar chill là nơi team tụ họp, nghỉ ngắn, và xây dựng sự kết nối giữa các bộ phận. Màu warm terracotta và view kính rộng mở khiến không gian trở thành điểm “reset cảm xúc”, nơi tinh thần làm việc được nạp lại năng lượng mới.',
+  print: 'Khu in ấn và tủ mẫu vật liệu là bộ phận kỹ thuật mang tính hỗ trợ, nhưng lại là nơi ghi nhận giá trị thực tế và độ tỉ mỉ của dự án. Không gian này giúp quá trình triển khai và kiểm tra vật liệu diễn ra rõ ràng, hiệu quả và chuyên nghiệp hơn rất nhiều.'
+};
+
+function restructureMoodboards() {
+  const cards = document.querySelectorAll('.moodboard-card');
+
+  cards.forEach((card) => {
+    const zone = card.id.replace(/^mb-/, '');
+    if (card.querySelector('.layout-visual')) return;
+
+    const canvas = card.querySelector('.mb-main-canvas');
+    if (!canvas) return;
+
+    const materialBoard = canvas.querySelector('.material-board-frame');
+    const perspectives = canvas.querySelector('.spatial-perspectives-frame');
+    const title = card.querySelector('.mb-title-wrap h3')?.textContent?.trim() || 'Khu vực thiết kế';
+    const zoneNumber = card.querySelector('.mb-badge-number')?.textContent?.trim() || '01';
+    const designFocus = card.querySelector('.mb-header-meta .mb-meta-item:last-child .mb-meta-val')?.textContent?.trim() || 'Điểm nhấn không gian';
+    const storyText = ZONE_STORY_MAP[zone] || 'Không gian này được thiết kế để tạo nên trải nghiệm làm việc chuyên nghiệp, hiện đại và có tính thương hiệu rõ ràng nhất.';
+
+    const layoutVisual = document.createElement('div');
+    layoutVisual.className = 'layout-visual';
+    layoutVisual.innerHTML = `
+      <div class="layout-visual-frame">
+        <img src="Moodboard/layout.jpg" alt="${title}">
+        <div class="layout-zone-overlay">
+          <span class="layout-zone-badge">${zoneNumber}</span>
+          <strong>${title}</strong>
+        </div>
+      </div>
+      <div class="layout-caption">
+        <span>Layout khu vực</span>
+        <p>${designFocus}</p>
+      </div>
+    `;
+
+    const rightStack = document.createElement('div');
+    rightStack.className = 'mb-right-stack';
+
+    if (materialBoard) rightStack.appendChild(materialBoard);
+    if (perspectives) rightStack.appendChild(perspectives);
+
+    canvas.innerHTML = '';
+    canvas.appendChild(layoutVisual);
+    canvas.appendChild(rightStack);
+
+    const storyPanel = document.createElement('div');
+    storyPanel.className = 'mb-story-panel';
+    storyPanel.innerHTML = `
+      <div class="story-panel-header">
+        <span class="story-panel-tag">Câu chuyện</span>
+        <h4>${title}</h4>
+      </div>
+      <p>${storyText}</p>
+    `;
+
+    card.appendChild(storyPanel);
+  });
 }
 
 // Filter Tabs Handling
@@ -262,7 +332,7 @@ function setupFloorplanHotspots() {
 }
 
 // Scroll to specific moodboard
-window.scrollToMoodboard = function(zoneId) {
+window.scrollToMoodboard = function (zoneId) {
   playSoftClick();
   const card = document.getElementById(`mb-${zoneId}`);
   if (card) {
@@ -285,7 +355,7 @@ function setupMaterialInspector() {
   function openInspector(key) {
     playSoftClick();
     const data = MATERIAL_DATABASE[key] || MATERIAL_DATABASE['oak'];
-    
+
     document.getElementById('modal-mat-title').textContent = data.name;
     document.getElementById('modal-mat-brand').textContent = data.brand;
     document.getElementById('modal-mat-finish').textContent = data.finish;
